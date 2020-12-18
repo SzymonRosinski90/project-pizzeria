@@ -1,7 +1,7 @@
 /* global Handlebars, utils, dataSource */ // eslint-disable-line no-unused-vars
 
 {
-  ('use strict');
+  'use strict';
 
   const select = {
     templateOf: {
@@ -45,45 +45,42 @@
       defaultValue: 1,
       defaultMin: 1,
       defaultMax: 9,
-    },
+    }
   };
 
   const templates = {
-    menuProduct: Handlebars.compile(
-      document.querySelector(select.templateOf.menuProduct).innerHTML
-    ),
+    menuProduct: Handlebars.compile(document.querySelector(select.templateOf.menuProduct).innerHTML),
   };
 
   class Product {
-    constructor(id, data) {
+    constructor(id, data){
       const thisProduct = this;
-
       thisProduct.id = id;
       thisProduct.data = data;
-
       thisProduct.renderInMenu();
       thisProduct.getElements();
       thisProduct.initAccordion();
       thisProduct.initOrderForm();
       thisProduct.processOrder();
-
       console.log('new Product:', thisProduct);
     }
-
-    renderInMenu() {
+    renderInMenu(){
       const thisProduct = this;
-
+      /* TASK 8.4 */
       /* generate HTML based on template */
       const generatedHTML = templates.menuProduct(thisProduct.data);
+
       /* create element using utils.createElementFromHTML */
       thisProduct.element = utils.createDOMFromHTML(generatedHTML);
+
       /* find menu container */
-      const menuContainer = document.querySelector(select.containerOf.menu);
-      /* add element to menu se*/
+      const menuContainer =  document.querySelector(select.containerOf.menu);
+
+      /* add element to menu */
       menuContainer.appendChild(thisProduct.element);
     }
 
-    getElements() {
+    getElements(){
       const thisProduct = this;
 
       thisProduct.accordionTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
@@ -93,60 +90,111 @@
       thisProduct.priceElem = thisProduct.element.querySelector(select.menuProduct.priceElem);
     }
 
-    initAccordion() {
+    initAccordion(){
       const thisProduct = this;
 
-      //const clickableTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
-      //console.log('clickableTrigger:', clickableTrigger);
+      /* find the clickable trigger (the element that should react to clicking) */
+      /*const clickableTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
+      console.log(clickableTrigger);
+      */
+      /* START: add event listener to clkable trigger on event click */
+      thisProduct.accordionTrigger.addEventListener('click', function(event) {
 
-      thisProduct.accordionTrigger.addEventListener('click', function (event) {
-        console.log('clicked');
-        event.preventDefault;
+        /* prevent default action for event */
+        event.preventDefault();
 
-        thisProduct.element.classList.toggle('active');
+        /* find active product (product that has active class) */
+        const activeProduct = document.querySelector(select.all.menuProductsActive);
+        //console.log(thisProduct.element);
 
-        const activeProducts = document.querySelectorAll(classNames.menuProduct.wrapperActive);
+        /* if there is active product and it's not thisProduct.element, remove class active from it */
+        if(activeProduct != null && activeProduct != thisProduct.element){
+          activeProduct.classList.remove(classNames.menuProduct.wrapperActive);
 
-        console.log('activeProducts:', activeProducts);
-
-        for (let activePruduct of activeProducts) {
-          if (activePruduct != this) {
-
-            activePruduct.classList.toggle('.active');
-          }
         }
+        /* toggle active class on thisProduct.element */
+        thisProduct.element.classList.toggle(classNames.menuProduct.wrapperActive);
       });
     }
-    initOrderForm() {
+
+    initOrderForm(){
       const thisProduct = this;
-      console.log('initOrderForm');
-    }
+      thisProduct.form.addEventListener('submit', function(event){
+        event.preventDefault();
+        thisProduct.processOrder();
+      });
 
-    processOrder() {
-      const thisProduct = this;
-      console.log('processOrder');
-    }
-
-  }
-
-  const app = {
-    initMenu: function () {
-      const thisApp = this;
-
-      console.log('thisApp.data:', thisApp.data);
-
-      for (let productData in thisApp.data.products) {
-        new Product(productData, thisApp.data.products[productData]);
+      for(let input of thisProduct.formInputs){
+        input.addEventListener('change', function(){
+          thisProduct.processOrder();
+        });
       }
-    },
 
-    initData: function () {
+      thisProduct.cartButton.addEventListener('click', function(event){
+        event.preventDefault();
+        thisProduct.processOrder();
+      });
+    }
+
+    processOrder(){
+      const thisProduct = this;
+      // convert form to object structure e.g. { sauce: ['tomato'], toppings: ['olives', 'redPeppers']}
+      const formData = utils.serializeFormToObject(thisProduct.form);
+      console.log('formData', formData);
+
+      // set price to default price
+      let price = thisProduct.data.price;
+      console.log(thisProduct.data.price);
+
+      // for every category (param)...
+      for(let paramId in thisProduct.data.params){
+
+        // determine param value, e.g. paramId = 'toppings', param = { label: 'Toppings', type: 'checkboxes'...}
+        const param = thisProduct.data.params[paramId];
+        console.log(paramId, param);
+
+        // for every option in this category
+        for(let optionId in param.options) {
+
+          // determine option value, e.g. optionId = 'olives', option = { labeL: 'Olives', price: 2, default: true}
+          const option = param.options[optionId];
+          console.log(optionId, option);
+
+          // najpierw muszę sprawdzić, czy obiekt formData zawiera wlasciwosc o kluczu paramId, a wartością tej właściwości ma być optionId
+          const firstCheck = formData.hasOwnProperty(paramId);
+          console.log(firstCheck);
+          console.log(formData[paramId].includes(optionId));
+          if(firstCheck == true && formData[paramId].includes(optionId)){
+            if(!option.default == true){
+              price += option.price;
+            }
+
+          } else if(option.default == true){
+            price -= option.price;
+          }
+        }
+      }
+      // update calculated price in the HTML
+      thisProduct.priceElem.innerHTML = price;
+    }
+  }
+  const app = {
+    initData: function(){
       const thisApp = this;
 
       thisApp.data = dataSource;
     },
 
-    init: function () {
+    initMenu: function(){
+      const thisApp = this;
+
+      //console.log('thisApp.data:', thisApp.data);
+      for(let productData in thisApp.data.products){
+        new Product(productData, thisApp.data.products[productData]);
+      }
+    },
+
+    init: function(){
       const thisApp = this;
       console.log('*** App starting ***');
       console.log('thisApp:', thisApp);
@@ -158,6 +206,5 @@
       thisApp.initMenu();
     },
   };
-
   app.init();
 }
