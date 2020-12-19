@@ -66,17 +66,16 @@
     }
     renderInMenu(){
       const thisProduct = this;
-      /* TASK 8.4 */
-      /* generate HTML based on template */
+      /* [8.5] generate HTML based on template */
       const generatedHTML = templates.menuProduct(thisProduct.data);
 
-      /* create element using utils.createElementFromHTML */
+      /* [8.5] create element using utils.createElementFromHTML */
       thisProduct.element = utils.createDOMFromHTML(generatedHTML);
 
-      /* find menu container */
+      /* [8.5] find menu container */
       const menuContainer =  document.querySelector(select.containerOf.menu);
 
-      /* add element to menu */
+      /* [8.5] add element to menu */
       menuContainer.appendChild(thisProduct.element);
     }
 
@@ -88,16 +87,13 @@
       thisProduct.formInputs = thisProduct.form.querySelectorAll(select.all.formInputs);
       thisProduct.cartButton = thisProduct.element.querySelector(select.menuProduct.cartButton);
       thisProduct.priceElem = thisProduct.element.querySelector(select.menuProduct.priceElem);
+      thisProduct.imageWrapper = thisProduct.element.querySelector(select.menuProduct.imageWrapper);
     }
 
     initAccordion(){
       const thisProduct = this;
 
-      /* find the clickable trigger (the element that should react to clicking) */
-      /*const clickableTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
-      console.log(clickableTrigger);
-      */
-      /* START: add event listener to clkable trigger on event click */
+      /* START: add event listener to clikable trigger on event click */
       thisProduct.accordionTrigger.addEventListener('click', function(event) {
 
         /* prevent default action for event */
@@ -160,17 +156,40 @@
           const option = param.options[optionId];
           console.log(optionId, option);
 
-          // najpierw muszę sprawdzić, czy obiekt formData zawiera wlasciwosc o kluczu paramId, a wartością tej właściwości ma być optionId
+          // [8.6] check if there is param with a name of paramId in formData and if it includes optionId
           const firstCheck = formData.hasOwnProperty(paramId);
-          console.log(firstCheck);
-          console.log(formData[paramId].includes(optionId));
-          if(firstCheck == true && formData[paramId].includes(optionId)){
+
+          const optionSelected = firstCheck == true && formData[paramId].includes(optionId);
+
+          if(optionSelected){
+
+            // [8.6] check if the option is not default
             if(!option.default == true){
+              // [8.6] add option price to price variable
               price += option.price;
             }
 
+            // [8.6] check if the option is default
           } else if(option.default == true){
+            // [8.6] reduce price variable
             price -= option.price;
+          }
+          // [8.7] find image with class .paramId-optionId
+          const image = thisProduct.imageWrapper.querySelector('.' + paramId + '-' + optionId);
+
+          // [8.7] check if it was found
+          if(image != null){
+
+            // [8.7] check if current option is 'checked'
+            if(optionSelected){
+
+              // [8.7] if it is, give img class 'active'
+              image.classList.add(classNames.menuProduct.imageVisible);
+
+              // [8.7] if it's not, remove class 'active'
+            } else {
+              image.classList.remove(classNames.menuProduct.imageVisible);
+            }
           }
         }
       }
