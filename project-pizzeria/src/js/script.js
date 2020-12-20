@@ -6,6 +6,7 @@
   const select = {
     templateOf: {
       menuProduct: '#template-menu-product',
+      cartProduct: '#template-cart-product', // CODE ADDED
     },
     containerOf: {
       menu: '#product-list',
@@ -26,11 +27,31 @@
     },
     widgets: {
       amount: {
-        input: 'input[name="amount"]',
+        input: 'input.amount', // CODE CHANGED
         linkDecrease: 'a[href="#less"]',
         linkIncrease: 'a[href="#more"]',
       },
     },
+    // CODE ADDED START
+    cart: {
+      productList: '.cart__order-summary',
+      toggleTrigger: '.cart__summary',
+      totalNumber: `.cart__total-number`,
+      totalPrice: '.cart__total-price strong, .cart__order-total .cart__order-price-sum strong',
+      subtotalPrice: '.cart__order-subtotal .cart__order-price-sum strong',
+      deliveryFee: '.cart__order-delivery .cart__order-price-sum strong',
+      form: '.cart__order',
+      formSubmit: '.cart__order [type="submit"]',
+      phone: '[name="phone"]',
+      address: '[name="address"]',
+    },
+    cartProduct: {
+      amountWidget: '.widget-amount',
+      price: '.cart__product-price',
+      edit: '[href="#edit"]',
+      remove: '[href="#remove"]',
+    },
+    // CODE ADDED END
   };
 
   const classNames = {
@@ -38,6 +59,11 @@
       wrapperActive: 'active',
       imageVisible: 'active',
     },
+    // CODE ADDED START
+    cart: {
+      wrapperActive: 'active',
+    },
+    // CODE ADDED END
   };
 
   const settings = {
@@ -45,11 +71,19 @@
       defaultValue: 1,
       defaultMin: 1,
       defaultMax: 9,
-    }
+    }, // CODE CHANGED
+    // CODE ADDED START
+    cart: {
+      defaultDeliveryFee: 20,
+    },
+    // CODE ADDED END
   };
 
   const templates = {
     menuProduct: Handlebars.compile(document.querySelector(select.templateOf.menuProduct).innerHTML),
+    // CODE ADDED START
+    cartProduct: Handlebars.compile(document.querySelector(select.templateOf.cartProduct).innerHTML),
+    // CODE ADDED END
   };
 
   class Product {
@@ -116,7 +150,7 @@
         //console.log(thisProduct.element);
 
         /* if there is active product and it's not thisProduct.element, remove class active from it */
-        if(activeProduct != null && activeProduct != thisProduct.element){
+        if(activeProduct !== null && activeProduct !== thisProduct.element){
           activeProduct.classList.remove(classNames.menuProduct.wrapperActive);
 
         }
@@ -170,17 +204,17 @@
 
           // [8.6] check if there is param with a name of paramId in formData and if it includes optionId
           // formData[paramId] = firstCheck == true
-          const optionSelected = formData.hasOwnProperty(paramId) == true && formData[paramId].includes(optionId);
+          const optionSelected = formData.hasOwnProperty(paramId) && formData[paramId].includes(optionId);
           if(optionSelected){
 
             // [8.6] check if the option is not default
-            if(!option.default == true){
+            if(!option.default){
               // [8.6] add option price to price variable
               price += option.price;
             }
 
             // [8.6] check if the option is default
-          } else if(option.default == true){
+          } else if(option.default){
             // [8.6] reduce price variable
             price -= option.price;
           }
@@ -188,7 +222,7 @@
           const image = thisProduct.imageWrapper.querySelector('.' + paramId + '-' + optionId);
 
           // [8.7] check if it was found
-          if(image != null){
+          if(image !== null){
 
             // [8.7] check if current option is 'checked'
             if(optionSelected){
@@ -236,7 +270,12 @@
       const newValue = parseInt(value);
 
       // check if the newValue is different from the one already written
-      if(thisWidget.value !== newValue && isNaN(newValue) == false && newValue <= 10 && newValue >= 0){
+      if(
+        thisWidget.value !== newValue &&
+        !isNaN(newValue) &&
+        newValue <= 10 &&
+        newValue >= 0
+      ){
         thisWidget.value = newValue;
       }
       thisWidget.input.value = thisWidget.value;
