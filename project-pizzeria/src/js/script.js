@@ -379,7 +379,10 @@
 
       thisCart.dom.wrapper = element;
       thisCart.dom.toggleTrigger = thisCart.dom.wrapper.querySelector(select.cart.toggleTrigger);
+<<<<<<< HEAD
       thisCart.dom.productList = thisCart.dom.wrapper.querySelector(select.cart.productList);
+=======
+>>>>>>> 08f8e0693b0197c9343ab405460b81c1244cab77
     }
 
     initActions(){
@@ -393,6 +396,7 @@
 
       });
     }
+<<<<<<< HEAD
 
     add(menuProduct){
       const thisCart = this;
@@ -403,6 +407,8 @@
 
       console.log('adding product', menuProduct);
     }
+=======
+>>>>>>> 08f8e0693b0197c9343ab405460b81c1244cab77
   }
 
   const app = {
@@ -442,3 +448,4 @@
   };
   app.init();
 }
+
