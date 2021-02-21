@@ -272,7 +272,7 @@
     }
 
     prepareCartProductParams(){
-      const thisProduct = ;
+      const thisProduct = this;
       const formData = utils.serializeFormToObject(thisProduct.form);
       const params = {};
 
